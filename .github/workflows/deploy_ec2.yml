@@ -1,4 +1,4 @@
-name: Deploy EC2 Consumer con Terraform.
+name: Deploy EC2 Consumer con Terraform
 
 on:
   push:
