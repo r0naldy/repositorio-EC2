@@ -88,7 +88,7 @@ resource "aws_iam_role_policy" "s3_access" {
 }
 
 resource "aws_iam_instance_profile" "ec2_profile" {
-  name = "ec2_profile"
+  name = "ec2_profile_cloud-computing"
   role = aws_iam_role.ec2_role.name
 }
 
@@ -98,7 +98,7 @@ resource "aws_instance" "consumer_ec2" {
   subnet_id              = aws_subnet.public.id
   vpc_security_group_ids = [aws_security_group.allow_http.id]
   key_name               = var.key_name
-  iam_instance_profile   = aws_iam_instance_profile.ec2_profile.name
+  iam_instance_profile   = aws_iam_instance_profile.ec2_profile_cloud-computing.name
 
   # 🚀 Reemplaza el bucket_name en el script automáticamente
   user_data = templatefile("${path.module}/scripts/init.sh.tmpl", {
