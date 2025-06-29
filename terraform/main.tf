@@ -29,8 +29,8 @@ resource "aws_route_table_association" "a" {
 
 # Seguridad
 resource "aws_security_group" "allow_http" {
-  name        = "allow_http"
-  vpc_id      = aws_vpc.main.id
+  name   = "allow_http"
+  vpc_id = aws_vpc.main.id
 
   ingress {
     from_port   = 5000
@@ -54,7 +54,7 @@ resource "aws_security_group" "allow_http" {
   }
 }
 
-# IAM
+# IAM Role para EC2 con acceso a S3
 resource "aws_iam_role" "ec2_role" {
   name = "ec2_s3_access_role"
 
@@ -88,18 +88,18 @@ resource "aws_iam_role_policy" "s3_access" {
 }
 
 resource "aws_iam_instance_profile" "ec2_profile_cloud_computing" {
-  name = "ec2_profile_cloud-computing"  
+  name = "ec2_profile_cloud_computing"  
   role = aws_iam_role.ec2_role.name
 }
 
+# Instancia EC2
 resource "aws_instance" "consumer_ec2" {
   ami                    = "ami-0c02fb55956c7d316"
   instance_type          = var.instance_type
   subnet_id              = aws_subnet.public.id
   vpc_security_group_ids = [aws_security_group.allow_http.id]
   key_name               = var.key_name
-  iam_instance_profile = aws_iam_instance_profile.ec2_profile_cloud_computing.name
-
+  iam_instance_profile   = aws_iam_instance_profile.ec2_profile_cloud_computing.name
 
   user_data = templatefile("${path.module}/scripts/init.sh.tmpl", {
     bucket_name = var.bucket_name
