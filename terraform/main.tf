@@ -54,7 +54,7 @@ resource "aws_security_group" "allow_http" {
   }
 }
 
-# IAM Role para EC2 con acceso a S3.
+# IAM Role para EC2 con acceso a S3
 resource "aws_iam_role" "ec2_role" {
   name = "ec2_s3_access_role"
 
