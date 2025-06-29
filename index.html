@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Consulta ID_SALES</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f4f7fa;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      padding: 40px 20px;
+      margin: 0;
+      color: #333;
+    }
+    .container {
+      background: white;
+      padding: 30px 40px;
+      border-radius: 8px;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+      max-width: 450px;
+      width: 100%;
+    }
+    h1 {
+      margin-top: 0;
+      margin-bottom: 20px;
+      font-weight: 700;
+      color: #1a202c;
+      text-align: center;
+    }
+    input[type=number] {
+      width: 100%;
+      padding: 12px 15px;
+      font-size: 1rem;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      margin-bottom: 15px;
+      transition: border-color 0.3s ease;
+    }
+    input[type=number]:focus {
+      outline: none;
+      border-color: #3182ce;
+      box-shadow: 0 0 5px #3182ce;
+    }
+    button {
+      width: 100%;
+      background-color: #3182ce;
+      border: none;
+      color: white;
+      padding: 14px;
+      font-size: 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #2c5282;
+    }
+    #resultado {
+      background: #edf2f7;
+      border-radius: 6px;
+      padding: 15px;
+      margin-top: 20px;
+      white-space: pre-wrap;
+      max-height: 300px;
+      overflow-y: auto;
+      font-family: Consolas, monospace;
+      font-size: 0.9rem;
+      color: #2d3748;
+      box-shadow: inset 0 0 5px rgba(0,0,0,0.05);
+    }
+    .error {
+      color: #e53e3e;
+      font-weight: 600;
+      text-align: center;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Buscar venta por ID_SALES</h1>
+    <input type="number" id="idInput" placeholder="Ingresa ID_SALES" min="1" />
+    <button onclick="buscar()">Buscar</button>
+    <pre id="resultado"></pre>
+    <div id="error" class="error"></div>
+  </div>
+
+  <script>
+    async function buscar() {
+      const id = document.getElementById('idInput').value.trim();
+      const resultado = document.getElementById('resultado');
+      const errorDiv = document.getElementById('error');
+
+      resultado.textContent = '';
+      errorDiv.textContent = '';
+
+      if (!id) {
+        errorDiv.textContent = 'Por favor ingresa un ID_SALES válido.';
+        return;
+      }
+
+      const url = `http://54.144.109.108:5000/data-json-${id}`;
+
+      try {
+        const res = await fetch(url);
+
+        if (!res.ok) {
+          errorDiv.textContent = 'ID_SALES no encontrado o error en la consulta.';
+          return;
+        }
+
+        const data = await res.json();
+        resultado.textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        errorDiv.textContent = 'Error al consultar la API: ' + err.message;
+      }
+    }
+
+    // Permite buscar con Enter también
+    document.getElementById('idInput').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        buscar();
+      }
+    });
+  </script>
+</body>
+</html>
