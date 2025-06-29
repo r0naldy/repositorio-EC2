@@ -1,0 +1,35 @@
+# terraform/scripts/init.sh.tmpl
+
+#!/bin/bash
+yum update -y
+yum install python3 -y
+pip3 install flask boto3
+
+cd /home/ec2-user
+cat > app.py <<EOF
+from flask import Flask, jsonify
+import boto3
+import json
+
+app = Flask(__name__)
+s3 = boto3.client('s3')
+
+BUCKET_NAME = "${bucket_name}"
+
+@app.route('/data-json-<int:id_sales>', methods=['GET'])
+def get_data(id_sales):
+    response = s3.list_objects_v2(Bucket=BUCKET_NAME)
+    for obj in response.get('Contents', []):
+        if obj['Key'].endswith('.json'):
+            file_obj = s3.get_object(Bucket=BUCKET_NAME, Key=obj['Key'])
+            data = json.loads(file_obj['Body'].read().decode('utf-8'))
+            for item in data:
+                if str(item.get('ID_SALES')) == str(id_sales):
+                    return jsonify(item)
+    return jsonify({'error': 'ID_SALES no encontrado'}), 404
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000)
+EOF
+
+python3 /home/ec2-user/app.py &

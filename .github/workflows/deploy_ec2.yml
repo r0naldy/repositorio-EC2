@@ -1,0 +1,36 @@
+name: Deploy EC2 Consumer con Terraform
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'terraform/**'
+      - '.github/workflows/deploy_ec2.yml'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+    steps:
+      - name: Clonar repositorio
+        uses: actions/checkout@v3
+
+      - name: Instalar Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.6
+
+      - name: Ingresar al directorio de Terraform
+        working-directory: terraform
+        run: |
+          terraform init
+          terraform validate
+
+      - name: Aplicar Terraform (EC2 Consumer)
+        working-directory: terraform
+        run: terraform apply -auto-approve
