@@ -99,7 +99,8 @@ resource "aws_instance" "consumer_ec2" {
   subnet_id              = aws_subnet.public.id
   vpc_security_group_ids = [aws_security_group.allow_http.id]
   key_name               = var.key_name
-  terraform import aws_iam_instance_profile.ec2_profile_cloud_computing ec2_profile_cloud_computing
+  iam_instance_profile = aws_iam_instance_profile.ec2_profile_cloud_computing.name
+
 
 
   user_data = templatefile("${path.module}/scripts/init.sh.tmpl", {
