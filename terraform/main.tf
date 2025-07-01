@@ -88,7 +88,7 @@ resource "aws_iam_role_policy" "s3_access" {
 }
 
 resource "aws_iam_instance_profile" "ec2_profile_cloud_computing" {
-  name = "ec2_profile_cloud_computing_prueba2"  
+  name = "ec2_profile_cloud_computing_prueba7"  
   role = aws_iam_role.ec2_role.name
 }
 
