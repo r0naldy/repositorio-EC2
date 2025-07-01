@@ -21,3 +21,12 @@ variable "bucket_name" {
   type        = string
   default     = "bucket-json-clear" 
 }
+
+variable "db_username" {
+  default = "root"
+}
+
+variable "db_password" {
+  default = "ventas123"
+}
+

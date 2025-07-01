@@ -1,3 +1,6 @@
+provider "aws" {
+  region = var.region
+}
 
 resource "aws_vpc" "main" {
   cidr_block = "10.0.0.0/16"
@@ -9,41 +12,22 @@ resource "aws_subnet" "public" {
   map_public_ip_on_launch = true
 }
 
-resource "aws_internet_gateway" "gw" {
-  vpc_id = aws_vpc.main.id
-}
-
-resource "aws_route_table" "rt" {
-  vpc_id = aws_vpc.main.id
-
-  route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.gw.id
-  }
-}
-
-resource "aws_route_table_association" "a" {
-  subnet_id      = aws_subnet.public.id
-  route_table_id = aws_route_table.rt.id
-}
-
-# Seguridad
-resource "aws_security_group" "allow_http" {
-  name   = "allow_http"
-  vpc_id = aws_vpc.main.id
+resource "aws_security_group" "allow_http_mysql" {
+  name        = "allow_http_mysql"
+  vpc_id      = aws_vpc.main.id
 
   ingress {
     from_port   = 5000
     to_port     = 5000
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["0.0.0.0/0"]  # Flask app
   }
 
   ingress {
-    from_port   = 22
-    to_port     = 22
+    from_port   = 3306
+    to_port     = 3306
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["0.0.0.0/0"]  # MySQL
   }
 
   egress {
@@ -54,60 +38,46 @@ resource "aws_security_group" "allow_http" {
   }
 }
 
-# IAM Role para EC2 con acceso a S3.
-resource "aws_iam_role" "ec2_role" {
-  name = "ec2_s3_access_role"
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [{
-      Effect = "Allow",
-      Principal = { Service = "ec2.amazonaws.com" },
-      Action = "sts:AssumeRole"
-    }]
-  })
+resource "aws_db_instance" "ventas" {
+  identifier         = "data-ventas"
+  allocated_storage  = 20
+  engine             = "mysql"
+  engine_version     = "8.0.41"
+  instance_class     = "db.t3.micro"
+  name               = "ventas"
+  username           = var.db_username
+  password           = var.db_password
+  publicly_accessible = true
+  vpc_security_group_ids = [aws_security_group.allow_http_mysql.id]
+  db_subnet_group_name   = aws_db_subnet_group.default.name
+  skip_final_snapshot    = true
 }
 
-resource "aws_iam_role_policy" "s3_access" {
-  name = "s3_access_policy"
-  role = aws_iam_role.ec2_role.id
-
-  policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Effect = "Allow",
-        Action = ["s3:GetObject", "s3:ListBucket"],
-        Resource = [
-          "arn:aws:s3:::${var.bucket_name}",
-          "arn:aws:s3:::${var.bucket_name}/*"
-        ]
-      }
-    ]
-  })
+resource "aws_db_subnet_group" "default" {
+  name       = "main-subnet-group"
+  subnet_ids = [aws_subnet.public.id]
 }
 
-resource "aws_iam_instance_profile" "ec2_profile_cloud_computing" {
-  name = "ec2_profile_cloud_computing_prueba7"  
-  role = aws_iam_role.ec2_role.name
-}
-
-# Instancia EC2
-resource "aws_instance" "consumer_ec2" {
-  ami                    = "ami-0c02fb55956c7d316"
+resource "aws_instance" "app_server" {
+  ami                    = "ami-0c2b8ca1dad447f8a"  # Amazon Linux 2
   instance_type          = var.instance_type
   subnet_id              = aws_subnet.public.id
-  vpc_security_group_ids = [aws_security_group.allow_http.id]
-  key_name               = var.key_name
-  iam_instance_profile = aws_iam_instance_profile.ec2_profile_cloud_computing.name
+  vpc_security_group_ids = [aws_security_group.allow_http_mysql.id]
+  associate_public_ip_address = true
+  key_name               = "your-key-name"
 
-
-
-  user_data = templatefile("${path.module}/scripts/init.sh.tmpl", {
-    bucket_name = var.bucket_name
-  })
+  user_data = <<-EOF
+              #!/bin/bash
+              yum update -y
+              yum install python3 -y
+              pip3 install flask flask_sqlalchemy mysql-connector-python
+              mkdir -p /app
+              cd /app
+              git clone https://github.com/YOUR_USERNAME/YOUR_REPO.git .
+              nohup python3 app/app.py > /dev/null 2>&1 &
+              EOF
 
   tags = {
-    Name = "consumer-api"
+    Name = "FlaskAppServer"
   }
 }

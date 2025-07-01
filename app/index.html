@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Buscar y Registrar Ventas</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f0f4f8;
+      padding: 30px;
+      color: #333;
+    }
+    .container {
+      background: #fff;
+      padding: 25px;
+      max-width: 700px;
+      margin: auto;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    }
+    h1 {
+      text-align: center;
+      color: #2d3748;
+    }
+    input, textarea, button {
+      width: 100%;
+      margin: 10px 0;
+      padding: 12px;
+      font-size: 1rem;
+    }
+    button {
+      background-color: #3182ce;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 6px;
+    }
+    button:hover {
+      background-color: #2b6cb0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    table, th, td {
+      border: 1px solid #ccc;
+      padding: 10px;
+    }
+    #error {
+      color: #e53e3e;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Ventas - Consultar y Registrar</h1>
+
+    <input type="number" id="idInput" placeholder="Buscar ID_SALES" />
+    <button onclick="buscar()">Buscar</button>
+
+    <div id="error"></div>
+    <table id="resultado" style="display:none;">
+      <thead><tr><th>Clave</th><th>Valor</th></tr></thead>
+      <tbody></tbody>
+    </table>
+
+    <hr />
+
+    <h3>Registrar nueva venta</h3>
+    <textarea id="jsonInput" rows="6" placeholder='{"ID_SALES":123,"CLIENTE":"Juan","MONTO":500}'></textarea>
+    <button onclick="registrar()">Registrar Venta</button>
+  </div>
+
+  <script>
+    async function buscar() {
+      const id = document.getElementById('idInput').value.trim();
+      const tabla = document.getElementById('resultado');
+      const tbody = tabla.querySelector('tbody');
+      const errorDiv = document.getElementById('error');
+
+      tabla.style.display = 'none';
+      tbody.innerHTML = '';
+      errorDiv.textContent = '';
+
+      if (!id) {
+        errorDiv.textContent = 'Ingresa un ID válido.';
+        return;
+      }
+
+      try {
+        const res = await fetch('/data-json-' + id);
+        if (!res.ok) {
+          errorDiv.textContent = 'Venta no encontrada.';
+          return;
+        }
+        const data = await res.json();
+        for (const [clave, valor] of Object.entries(data)) {
+          const row = document.createElement('tr');
+          row.innerHTML = `<td>${clave}</td><td>${valor}</td>`;
+          tbody.appendChild(row);
+        }
+        tabla.style.display = 'table';
+      } catch (err) {
+        errorDiv.textContent = 'Error: ' + err.message;
+      }
+    }
+
+    async function registrar() {
+      const errorDiv = document.getElementById('error');
+      const jsonRaw = document.getElementById('jsonInput').value.trim();
+
+      errorDiv.textContent = '';
+      try {
+        const data = JSON.parse(jsonRaw);
+        const res = await fetch('/add-sale', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(data)
+        });
+
+        const resJson = await res.json();
+        if (res.ok) {
+          alert(resJson.message);
+        } else {
+          errorDiv.textContent = resJson.error || 'Error al registrar.';
+        }
+      } catch (e) {
+        errorDiv.textContent = 'JSON inválido.';
+      }
+    }
+  </script>
+</body>
+</html>
