@@ -54,4 +54,3 @@ jobs:
           cd /home/ec2-user/app
           nohup python3 app.py > log.txt 2>&1 &
           
-#d

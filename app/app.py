@@ -3,7 +3,6 @@ from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 
-# Configuración de conexión a RDS MySQL
 DB_USER = 'root'
 DB_PASS = 'ventas123'
 DB_HOST = 'data-ventas.cw7awmw0s20d.us-east-1.rds.amazonaws.com'
