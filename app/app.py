@@ -145,7 +145,7 @@ def add_sale():
 @app.route('/import-from-s3', methods=['POST'])
 def import_from_s3():
     bucket_name = "bucket-json-clear"
-    json_key = "data.json"  # Cambiar si tu archivo se llama distinto
+    json_key = "sales_data_dirty_20_errores.json"  
 
     try:
         s3 = boto3.client('s3')
