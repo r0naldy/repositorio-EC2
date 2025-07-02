@@ -53,5 +53,3 @@ jobs:
           pkill -f app.py || true
           cd /home/ec2-user/app
           nohup python3 app.py > log.txt 2>&1 &
-
-  #aa        
