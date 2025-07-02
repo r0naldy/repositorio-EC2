@@ -12,7 +12,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql+mysqlconnector://{DB_USER}:{DB_P
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
-# MODELO COMPLE
+# MODELO COMPLETO
 class Venta(db.Model):
     __tablename__ = 'ventas'
 
