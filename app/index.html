@@ -6,35 +6,37 @@
   <title>Buscar y Registrar Ventas</title>
   <style>
     body {
-      font-family: sans-serif;
-      background: #f0f4f8;
-      padding: 30px;
-      color: #333;
+      font-family: Arial, sans-serif;
+      background: #edf2f7;
+      padding: 40px;
+      color: #2d3748;
     }
     .container {
       background: #fff;
-      padding: 25px;
-      max-width: 700px;
+      padding: 30px;
+      max-width: 800px;
       margin: auto;
       border-radius: 10px;
-      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
     h1 {
       text-align: center;
-      color: #2d3748;
+      margin-bottom: 30px;
     }
     input, textarea, button {
       width: 100%;
-      margin: 10px 0;
+      margin: 12px 0;
       padding: 12px;
       font-size: 1rem;
+      border-radius: 6px;
+      border: 1px solid #cbd5e0;
     }
     button {
       background-color: #3182ce;
       color: white;
+      font-weight: bold;
       border: none;
-      cursor: pointer;
-      border-radius: 6px;
+      transition: background-color 0.3s ease;
     }
     button:hover {
       background-color: #2b6cb0;
@@ -44,14 +46,21 @@
       border-collapse: collapse;
       margin-top: 20px;
     }
-    table, th, td {
-      border: 1px solid #ccc;
+    table th, table td {
+      border: 1px solid #e2e8f0;
       padding: 10px;
+      text-align: left;
+    }
+    table th {
+      background-color: #f7fafc;
     }
     #error {
       color: #e53e3e;
       font-weight: bold;
       margin-top: 10px;
+    }
+    hr {
+      margin: 30px 0;
     }
   </style>
 </head>
@@ -63,7 +72,7 @@
     <button onclick="buscar()">Buscar</button>
 
     <div id="error"></div>
-    <table id="resultado" style="display:none;">
+    <table id="resultado" style="display: none;">
       <thead><tr><th>Clave</th><th>Valor</th></tr></thead>
       <tbody></tbody>
     </table>
@@ -116,7 +125,7 @@
       tbody.innerHTML = '';
       errorDiv.textContent = '';
 
-      if (!id) {
+      if (!id || isNaN(id)) {
         errorDiv.textContent = 'Ingresa un ID válido.';
         return;
       }
@@ -148,7 +157,7 @@
         const data = JSON.parse(jsonRaw);
         const res = await fetch('/add-sale', {
           method: 'POST',
-          headers: {'Content-Type': 'application/json'},
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data)
         });
 
@@ -159,7 +168,7 @@
           errorDiv.textContent = resJson.error || 'Error al registrar.';
         }
       } catch (e) {
-        errorDiv.textContent = 'JSON inválido.';
+        errorDiv.textContent = 'JSON inválido: ' + e.message;
       }
     }
 

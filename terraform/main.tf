@@ -32,7 +32,7 @@ resource "aws_subnet" "public_b" {
   }
 }
 
-# Internet Gateway
+
 resource "aws_internet_gateway" "gw" {
   vpc_id = aws_vpc.main.id
 
@@ -69,7 +69,7 @@ resource "aws_route_table_association" "public_subnet_b" {
 
 
 resource "aws_db_subnet_group" "default" {
-  name       = "main-subnet-group-v6"
+  name       = "main-subnet-group-v7"
   subnet_ids = [
     aws_subnet.public_a.id,
     aws_subnet.public_b.id
@@ -98,6 +98,14 @@ resource "aws_security_group" "allow_http_mysql" {
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
+  
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 
   egress {
     from_port   = 0
@@ -113,7 +121,7 @@ resource "aws_security_group" "allow_http_mysql" {
 
 # RDS MySQL
 resource "aws_db_instance" "ventas" {
-  identifier              = "data-ventas4"
+  identifier              = "data-ventas5"
   allocated_storage       = 20
   engine                  = "mysql"
   engine_version          = "8.0.41"
@@ -149,13 +157,13 @@ resource "aws_instance" "app_server" {
               EOF
 
   tags = {
-    Name = "FlaskAppServer2"
+    Name = "FlaskAppServer3"
   }
 }
 
 
 resource "aws_iam_role" "ec2_role" {
-  name = "ec2_s3_access_role-4"
+  name = "ec2_s3_access_role-5"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
@@ -191,7 +199,7 @@ resource "aws_iam_role_policy" "s3_policy" {
 }
 
 resource "aws_iam_instance_profile" "ec2_profile" {
-  name = "ec2_profile_v6"  
+  name = "ec2_profile_v7"  
   role = aws_iam_role.ec2_role.name
 }
 
