@@ -198,6 +198,6 @@ def import_from_s3():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-# INICIAR APP
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)

@@ -55,19 +55,19 @@ resource "aws_route_table" "public" {
   }
 }
 
-# Asociar tabla de rutas a subred pública A
+
 resource "aws_route_table_association" "public_subnet_a" {
   subnet_id      = aws_subnet.public_a.id
   route_table_id = aws_route_table.public.id
 }
 
-# Asociar tabla de rutas a subred pública B
+
 resource "aws_route_table_association" "public_subnet_b" {
   subnet_id      = aws_subnet.public_b.id
   route_table_id = aws_route_table.public.id
 }
 
-# Subnet Group para RDS
+
 resource "aws_db_subnet_group" "default" {
   name       = "main-subnet-group-v2"
   subnet_ids = [
@@ -80,7 +80,7 @@ resource "aws_db_subnet_group" "default" {
   }
 }
 
-# Seguridad para Flask y MySQL
+
 resource "aws_security_group" "allow_http_mysql" {
   name   = "allow_http_mysql"
   vpc_id = aws_vpc.main.id
@@ -113,7 +113,7 @@ resource "aws_security_group" "allow_http_mysql" {
 
 # RDS MySQL
 resource "aws_db_instance" "ventas" {
-  identifier              = "data-ventas"
+  identifier              = "data-ventas2"
   allocated_storage       = 20
   engine                  = "mysql"
   engine_version          = "8.0.41"
@@ -129,7 +129,7 @@ resource "aws_db_instance" "ventas" {
 
 # EC2 con Flask App
 resource "aws_instance" "app_server" {
-  ami                         = "ami-0c2b8ca1dad447f8a" # Amazon Linux 2
+  ami                         = "ami-0c2b8ca1dad447f8a" 
   instance_type               = var.instance_type
   subnet_id                   = aws_subnet.public_a.id
   vpc_security_group_ids      = [aws_security_group.allow_http_mysql.id]
@@ -153,7 +153,7 @@ resource "aws_instance" "app_server" {
   }
 }
 
-# IAM Role para EC2 con permisos S3
+
 resource "aws_iam_role" "ec2_role" {
   name = "ec2_s3_access_role"
 
@@ -169,7 +169,7 @@ resource "aws_iam_role" "ec2_role" {
   })
 }
 
-# Política de acceso a S3
+
 resource "aws_iam_role_policy" "s3_policy" {
   name = "ec2_s3_policy"
   role = aws_iam_role.ec2_role.id
@@ -191,6 +191,6 @@ resource "aws_iam_role_policy" "s3_policy" {
 }
 
 resource "aws_iam_instance_profile" "ec2_profile" {
-  name = "ec2_profile_v2"  
+  name = "ec2_profile_v3"  
   role = aws_iam_role.ec2_role.name
 }
