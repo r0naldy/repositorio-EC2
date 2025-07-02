@@ -93,7 +93,7 @@ def get_data(id_sales):
         })
     return jsonify({'error': 'ID_SALES no encontrado'}), 404
 
-# AGREGAR VENTA MANUAL
+
 @app.route('/add-sale', methods=['POST'])
 def add_sale():
     data = request.get_json()

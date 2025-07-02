@@ -91,7 +91,7 @@ resource "aws_instance" "app_server" {
   }
 }
 
-# Rol IAM para que EC2 acceda al bucket S3
+
 resource "aws_iam_role" "ec2_role" {
   name = "ec2_s3_access_role"
 
@@ -107,7 +107,7 @@ resource "aws_iam_role" "ec2_role" {
   })
 }
 
-# Política que da permisos de lectura en el bucket S3
+
 resource "aws_iam_role_policy" "s3_policy" {
   name = "ec2_s3_policy"
   role = aws_iam_role.ec2_role.id
