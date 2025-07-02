@@ -40,7 +40,7 @@ resource "aws_db_instance" "ventas" {
   engine             = "mysql"
   engine_version     = "8.0.41"
   instance_class     = "db.t3.micro"
-  name               = "ventas"
+  db_name            = "ventas"
   username           = var.db_username
   password           = var.db_password
   publicly_accessible = true
