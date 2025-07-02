@@ -51,12 +51,12 @@ class Venta(db.Model):
 with app.app_context():
     db.create_all()
 
-# RUTA PRINCIPAL
+
 @app.route('/')
 def index():
     return send_file('index.html')
 
-# CONSULTAR POR ID_SALES
+
 @app.route('/data-json-<int:id_sales>', methods=['GET'])
 def get_data(id_sales):
     venta = Venta.query.filter_by(id_sales=id_sales).first()

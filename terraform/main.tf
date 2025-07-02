@@ -1,6 +1,3 @@
-provider "aws" {
-  region = var.region
-}
 
 resource "aws_vpc" "main" {
   cidr_block = "10.0.0.0/16"
@@ -92,10 +89,6 @@ resource "aws_instance" "app_server" {
   tags = {
     Name = "FlaskAppServer"
   }
-}
-# Variable con el nombre del bucket S3
-variable "bucket_name" {
-  default = "bucket-json-clear"
 }
 
 # Rol IAM para que EC2 acceda al bucket S3
