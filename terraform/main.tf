@@ -69,7 +69,7 @@ resource "aws_route_table_association" "public_subnet_b" {
 
 
 resource "aws_db_subnet_group" "default" {
-  name       = "main-subnet-group-v7"
+  name       = "main-subnet-group-v8"
   subnet_ids = [
     aws_subnet.public_a.id,
     aws_subnet.public_b.id
@@ -121,7 +121,7 @@ resource "aws_security_group" "allow_http_mysql" {
 
 # RDS MySQL
 resource "aws_db_instance" "ventas" {
-  identifier              = "data-ventas5"
+  identifier              = "data-ventas8"
   allocated_storage       = 20
   engine                  = "mysql"
   engine_version          = "8.0.41"
@@ -157,13 +157,13 @@ resource "aws_instance" "app_server" {
               EOF
 
   tags = {
-    Name = "FlaskAppServer3"
+    Name = "FlaskAppServer4"
   }
 }
 
 
 resource "aws_iam_role" "ec2_role" {
-  name = "ec2_s3_access_role-5"
+  name = "ec2_s3_access_role-6"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
@@ -199,7 +199,7 @@ resource "aws_iam_role_policy" "s3_policy" {
 }
 
 resource "aws_iam_instance_profile" "ec2_profile" {
-  name = "ec2_profile_v7"  
+  name = "ec2_profile_v8"  
   role = aws_iam_role.ec2_role.name
 }
 
