@@ -1,3 +1,7 @@
+provider "aws" {
+  region = var.region
+}
+
 resource "aws_vpc" "main" {
   cidr_block = "10.0.0.0/16"
 }
@@ -25,14 +29,14 @@ resource "aws_db_subnet_group" "default" {
 }
 
 resource "aws_security_group" "allow_http_mysql" {
-  name        = "allow_http_mysql"
-  vpc_id      = aws_vpc.main.id
+  name   = "allow_http_mysql"
+  vpc_id = aws_vpc.main.id
 
   ingress {
     from_port   = 5000
     to_port     = 5000
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]  # Flask ap
+    cidr_blocks = ["0.0.0.0/0"]  # Flask app
   }
 
   ingress {
@@ -51,28 +55,28 @@ resource "aws_security_group" "allow_http_mysql" {
 }
 
 resource "aws_db_instance" "ventas" {
-  identifier         = "data-ventas"
-  allocated_storage  = 20
-  engine             = "mysql"
-  engine_version     = "8.0.41"
-  instance_class     = "db.t3.micro"
-  db_name            = "ventas"
-  username           = var.db_username
-  password           = var.db_password
-  publicly_accessible = true
-  vpc_security_group_ids = [aws_security_group.allow_http_mysql.id]
-  db_subnet_group_name   = aws_db_subnet_group.default.name
-  skip_final_snapshot    = true
+  identifier              = "data-ventas"
+  allocated_storage       = 20
+  engine                  = "mysql"
+  engine_version          = "8.0.41"
+  instance_class          = "db.t3.micro"
+  db_name                 = "ventas"
+  username                = var.db_username
+  password                = var.db_password
+  publicly_accessible     = true
+  vpc_security_group_ids  = [aws_security_group.allow_http_mysql.id]
+  db_subnet_group_name    = aws_db_subnet_group.default.name
+  skip_final_snapshot     = true
 }
 
-
 resource "aws_instance" "app_server" {
-  ami                    = "ami-0c2b8ca1dad447f8a"  # Amazon Linux 2
-  instance_type          = var.instance_type
-  subnet_id              = aws_subnet.public.id
-  vpc_security_group_ids = [aws_security_group.allow_http_mysql.id]
+  ami                         = "ami-0c2b8ca1dad447f8a" 
+  instance_type               = var.instance_type
+  subnet_id                   = aws_subnet.public_a.id  
+  vpc_security_group_ids      = [aws_security_group.allow_http_mysql.id]
   associate_public_ip_address = true
-  key_name               = "ec2"
+  key_name                    = "ec2"  
+  iam_instance_profile        = aws_iam_instance_profile.ec2_profile.name
 
   user_data = <<-EOF
               #!/bin/bash
@@ -88,4 +92,51 @@ resource "aws_instance" "app_server" {
   tags = {
     Name = "FlaskAppServer"
   }
+}
+# Variable con el nombre del bucket S3
+variable "bucket_name" {
+  default = "bucket-json-clear"
+}
+
+# Rol IAM para que EC2 acceda al bucket S3
+resource "aws_iam_role" "ec2_role" {
+  name = "ec2_s3_access_role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [{
+      Effect = "Allow",
+      Principal = {
+        Service = "ec2.amazonaws.com"
+      },
+      Action = "sts:AssumeRole"
+    }]
+  })
+}
+
+# Política que da permisos de lectura en el bucket S3
+resource "aws_iam_role_policy" "s3_policy" {
+  name = "ec2_s3_policy"
+  role = aws_iam_role.ec2_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [{
+      Effect = "Allow",
+      Action = [
+        "s3:GetObject",
+        "s3:ListBucket"
+      ],
+      Resource = [
+        "arn:aws:s3:::${var.bucket_name}",
+        "arn:aws:s3:::${var.bucket_name}/*"
+      ]
+    }]
+  })
+}
+
+# Perfil de instancia para EC2
+resource "aws_iam_instance_profile" "ec2_profile" {
+  name = "ec2_profile"
+  role = aws_iam_role.ec2_role.name
 }

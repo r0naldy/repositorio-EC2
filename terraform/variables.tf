@@ -1,19 +1,9 @@
-variable "aws_region" {
-  description = "Región de AWS"
-  type        = string
-  default     = "us-east-1"
-}
-
-variable "key_name" {
-  description = "Nombre del par de claves EC2"
-  type        = string
-  default     = "ec2"  
+variable "region" {
+  default = "us-east-1"
 }
 
 variable "instance_type" {
-  description = "Tipo de instancia EC2"
-  type        = string
-  default     = "t2.micro"
+  default = "t2.micro"
 }
 
 variable "bucket_name" {

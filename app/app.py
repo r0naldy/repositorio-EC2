@@ -1,3 +1,5 @@
+import boto3
+import json
 from flask import Flask, request, jsonify, send_file
 from flask_sqlalchemy import SQLAlchemy
 
@@ -12,7 +14,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = f'mysql+mysqlconnector://{DB_USER}:{DB_P
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
-# MODELO COMPLET
+# MODELO DE LA TABLA
 class Venta(db.Model):
     __tablename__ = 'ventas'
 
@@ -49,10 +51,12 @@ class Venta(db.Model):
 with app.app_context():
     db.create_all()
 
+# RUTA PRINCIPAL
 @app.route('/')
 def index():
     return send_file('index.html')
 
+# CONSULTAR POR ID_SALES
 @app.route('/data-json-<int:id_sales>', methods=['GET'])
 def get_data(id_sales):
     venta = Venta.query.filter_by(id_sales=id_sales).first()
@@ -89,10 +93,10 @@ def get_data(id_sales):
         })
     return jsonify({'error': 'ID_SALES no encontrado'}), 404
 
+# AGREGAR VENTA MANUAL
 @app.route('/add-sale', methods=['POST'])
 def add_sale():
     data = request.get_json()
-
     try:
         id_sales = int(data['ID_SALES'])
         if Venta.query.filter_by(id_sales=id_sales).first():
@@ -137,5 +141,63 @@ def add_sale():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+# IMPORTAR JSON DESDE S3
+@app.route('/import-from-s3', methods=['POST'])
+def import_from_s3():
+    bucket_name = "bucket-json-clear"
+    json_key = "data.json"  # Cambiar si tu archivo se llama distinto
+
+    try:
+        s3 = boto3.client('s3')
+        response = s3.get_object(Bucket=bucket_name, Key=json_key)
+        data = json.loads(response['Body'].read())
+        registros_insertados = 0
+
+        for item in data:
+            id_sales = int(item['ID_SALES'])
+            if Venta.query.filter_by(id_sales=id_sales).first():
+                continue
+
+            venta = Venta(
+                id_sales = id_sales,
+                ordernumber = item.get('ORDERNUMBER'),
+                quantityordered = item.get('QUANTITYORDERED'),
+                priceeach = item.get('PRICEEACH'),
+                orderlinenumber = item.get('ORDERLINENUMBER'),
+                sales = item.get('SALES'),
+                orderdate = item.get('ORDERDATE'),
+                status = item.get('STATUS'),
+                qtr_id = item.get('QTR_ID'),
+                month_id = item.get('MONTH_ID'),
+                year_id = item.get('YEAR_ID'),
+                productline = item.get('PRODUCTLINE'),
+                msrp = item.get('MSRP'),
+                productcode = item.get('PRODUCTCODE'),
+                customername = item.get('CUSTOMERNAME'),
+                phone = item.get('PHONE'),
+                addressline1 = item.get('ADDRESSLINE1'),
+                addressline2 = item.get('ADDRESSLINE2'),
+                city = item.get('CITY'),
+                state = item.get('STATE'),
+                postalcode = item.get('POSTALCODE'),
+                country = item.get('COUNTRY'),
+                territory = item.get('TERRITORY'),
+                contactlastname = item.get('CONTACTLASTNAME'),
+                contactfirstname = item.get('CONTACTFIRSTNAME'),
+                dealsize = item.get('DEALSIZE'),
+                numericcode = item.get('NUMERICCODE'),
+                msrp_issue = item.get('MSRP_ISSUE', False)
+            )
+
+            db.session.add(venta)
+            registros_insertados += 1
+
+        db.session.commit()
+        return jsonify({'message': f'{registros_insertados} registros insertados desde S3'}), 201
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# INICIAR APP
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)

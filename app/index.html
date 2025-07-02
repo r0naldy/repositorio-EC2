@@ -102,6 +102,7 @@
   "MSRP_ISSUE": false
 }'></textarea>
     <button onclick="registrar()">Registrar Venta</button>
+    <button onclick="importarDesdeS3()">Importar JSON desde S3</button>
   </div>
 
   <script>
@@ -159,6 +160,22 @@
         }
       } catch (e) {
         errorDiv.textContent = 'JSON inválido.';
+      }
+    }
+
+    async function importarDesdeS3() {
+      const errorDiv = document.getElementById('error');
+      errorDiv.textContent = '';
+      try {
+        const res = await fetch('/import-from-s3', { method: 'POST' });
+        const resJson = await res.json();
+        if (res.ok) {
+          alert(resJson.message);
+        } else {
+          errorDiv.textContent = resJson.error || 'Error al importar.';
+        }
+      } catch (e) {
+        errorDiv.textContent = 'Error al conectarse con el servidor.';
       }
     }
   </script>
