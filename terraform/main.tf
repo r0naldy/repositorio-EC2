@@ -20,7 +20,7 @@ resource "aws_security_group" "allow_http_mysql" {
     from_port   = 5000
     to_port     = 5000
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]  # Flask app
+    cidr_blocks = ["0.0.0.0/0"]  # Flask ap
   }
 
   ingress {

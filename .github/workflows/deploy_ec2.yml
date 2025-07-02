@@ -48,8 +48,10 @@ jobs:
         key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
         script: |
           sudo yum update -y
-          sudo yum install python3 -y
+          sudo yum install python3 gcc python3-devel mysql-devel -y
           pip3 install --user flask flask_sqlalchemy mysql-connector-python
           pkill -f app.py || true
           cd /home/ec2-user/app
           nohup python3 app.py > log.txt 2>&1 &
+          
+#d
