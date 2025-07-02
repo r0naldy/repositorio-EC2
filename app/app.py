@@ -141,7 +141,7 @@ def add_sale():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-# IMPORTAR JSON DESDE S3
+
 @app.route('/import-from-s3', methods=['POST'])
 def import_from_s3():
     bucket_name = "bucket-json-clear"

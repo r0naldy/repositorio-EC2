@@ -69,7 +69,7 @@ resource "aws_route_table_association" "public_subnet_b" {
 
 
 resource "aws_db_subnet_group" "default" {
-  name       = "main-subnet-group-v2"
+  name       = "main-subnet-group-v3"
   subnet_ids = [
     aws_subnet.public_a.id,
     aws_subnet.public_b.id
@@ -191,6 +191,6 @@ resource "aws_iam_role_policy" "s3_policy" {
 }
 
 resource "aws_iam_instance_profile" "ec2_profile" {
-  name = "ec2_profile_v3"  
+  name = "ec2_profile_v4"  
   role = aws_iam_role.ec2_role.name
 }
