@@ -65,10 +65,6 @@ resource "aws_db_instance" "ventas" {
   skip_final_snapshot    = true
 }
 
-resource "aws_db_subnet_group" "default" {
-  name       = "main-subnet-group"
-  subnet_ids = [aws_subnet.public.id]
-}
 
 resource "aws_instance" "app_server" {
   ami                    = "ami-0c2b8ca1dad447f8a"  # Amazon Linux 2
