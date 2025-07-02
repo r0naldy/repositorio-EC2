@@ -69,7 +69,7 @@ resource "aws_route_table_association" "public_subnet_b" {
 
 # Subnet Group para RDS
 resource "aws_db_subnet_group" "default" {
-  name       = "main-subnet-group"
+  name       = "main-subnet-group-v2"
   subnet_ids = [
     aws_subnet.public_a.id,
     aws_subnet.public_b.id
@@ -135,7 +135,7 @@ resource "aws_instance" "app_server" {
   vpc_security_group_ids      = [aws_security_group.allow_http_mysql.id]
   associate_public_ip_address = true
   key_name                    = "ec2"
-  iam_instance_profile        = aws_iam_instance_profile.ec2_profile.name
+  iam_instance_profile = aws_iam_instance_profile.ec2_profile.name
 
   user_data = <<-EOF
               #!/bin/bash
@@ -190,8 +190,7 @@ resource "aws_iam_role_policy" "s3_policy" {
   })
 }
 
-# Perfil de instancia
 resource "aws_iam_instance_profile" "ec2_profile" {
-  name = "ec2_profile"
+  name = "ec2_profile_v2"  
   role = aws_iam_role.ec2_role.name
 }
